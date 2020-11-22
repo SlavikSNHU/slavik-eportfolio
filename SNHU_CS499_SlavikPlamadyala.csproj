@@ -52,6 +52,7 @@
     <Compile Include="ConfigurationWindow.designer.cs">
       <DependentUpon>ConfigurationWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Misc\Configuration.cs" />
     <Compile Include="Misc\myXML.cs" />
     <Compile Include="Misc\retStatus.cs" />
     <Compile Include="Misc\SQLServer.cs" />
