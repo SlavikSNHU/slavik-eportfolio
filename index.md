@@ -10,4 +10,4 @@
 4. Connection checking to database.
 
 ### **Artifacts Breakdown**
-<img src="https://images.app.goo.gl/RMzmN2kRbM17cVLA9" alt="hi" class="inline"/>
+<img src="https://www.macobserver.com/wp-content/uploads/2017/10/code-2434271_1280-1024x538.jpg?ezimgfmt=ng:webp/ngcb1" style="display: block; margin: auto;" />
