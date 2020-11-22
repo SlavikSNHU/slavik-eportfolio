@@ -1,6 +1,2 @@
 theme: jekyll-theme-midnight
 title: Slavik Plamadyala SNHU CS499 Capstone Homepage
-steps:
-- title: Informal Code Review
-  description: Analyze current code implementation and go over all artifacts that require modifications.
-  video: https://youtube.com/embed/w3jLJU7DT5E
