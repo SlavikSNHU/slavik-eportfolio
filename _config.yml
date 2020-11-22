@@ -4,4 +4,3 @@ steps:
 - title: Informal Code Review
   description: Analyze current code implementation and go over all artifacts that require modifications.
   video: https://www.youtube.com/embed/1yuDK3IXnb4
-  
