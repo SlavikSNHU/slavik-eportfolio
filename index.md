@@ -8,10 +8,10 @@
 
 
 ### **List of Artifacts**
-1. - [x] Application memory usage.
-2. - [ ] Use of proper data structures for quick lookups.
-3. - [ ] Continue to function without connection to database.
-4. - [ ] Connection checking to database.
+1. Application memory usage.
+2. Use of proper data structures for quick lookups.
+3. Continue to function without connection to database.
+4. Connection checking to database.
 
 ### **Artifacts Breakdown**
 <div style="width:641px; height:76px; overflow:hidden">
@@ -19,6 +19,7 @@
 </div>
 
 ### **Application Memory Usage**
+------------
 #### Using C# API SQL query was constructed to retrieve all data from selected database table and place it inside `DataTable` class on stack. Due to this implementation as database grows, loading entire table content into the memory could lead to stack overflow error. 
 #### Example for SQL query being used:
 ##### ```SELECT * FROM dbo.table```
@@ -26,3 +27,5 @@
 #### In order to fix this issue new function were create that would accept additional arguments that include id column name and id number. This change would only retreive configuraiton information from database for selected model id.
 #### Example of new SQL query to fix the issue:
 ##### ```SELECT * FROM dbo.table WHERE col_id_name = id```
+------------
+
