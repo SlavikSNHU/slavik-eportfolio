@@ -16,12 +16,9 @@ namespace SNHU_CS499_SlavikPlamadyala
             private byte[] data;        // Store configuration value
             private Control controlRef; // Reference to control that may use stored value
             private int dataLen;        // Size of configuraiton value
-            private string dataName;    // Name used by sql database
             private Type dataType;      // Type of configuraiton value
             private int offset;         // Offset inside external device configuration structure buffer
             private bool saveInsideDB;  // Indicate if this configuraiton value should be stored inside database
-
-            public string DataName => dataName;
             public bool SaveInsideDB => saveInsideDB;
 
             /// <summary>
@@ -33,11 +30,10 @@ namespace SNHU_CS499_SlavikPlamadyala
             /// <param name="_dataType">Type of configuraiton value</param>
             /// <param name="_offset">Offset inside external device configuration structure buffer</param>
             /// <param name="_saveInsideDB">Indicate if this configuraiton value should be stored inside database</param>
-            public Configuraiton(Control _controlRef, int _dataLen, string _dataName, Type _dataType, int _offset, bool _saveInsideDB = true)
+            public Configuraiton(Control _controlRef, int _dataLen, Type _dataType, int _offset, bool _saveInsideDB = true)
             {
                 controlRef = _controlRef;
                 dataLen = _dataLen;
-                dataName = _dataName;
                 dataType = _dataType;
                 offset = _offset;
                 saveInsideDB = _saveInsideDB;
@@ -389,11 +385,15 @@ err:
                 foreach (byte b in data)
                     dataList.Add(b);
             }
+
+            public bool StoreInisdeDB()
+            {
+                return false;
+            }
         }
-        private List<Configuraiton> mcConfiguraiton;
+        private Dictionary<string, Configuraiton> mcConfiguraiton = new Dictionary<string, Configuraiton>();
 
         private const string dbConnection = @"user id=na;server=na;Trusted_Connection=yes;database=na;connection timeout=1";
-
         private const string dbtModel = "dbo.Model";
         private const string dbtConfig = "dbo.Configuration";
 
@@ -487,52 +487,39 @@ err:
         #endregion Misc
 
         #region Config Controls
-        public static Configuraiton GetConfigByName(string name, List<Configuraiton> configuraitons)
-        {
-            foreach (Configuraiton config in configuraitons)
-                if (config.DataName.Equals(name))
-                    return config;
-
-            return null;
-        }
         private void InitializeMCControls()
         {
             int offset = 0;
             // Initialize motor configuraiton data structure
-            mcConfiguraiton = new List<Configuraiton>
-            {
-                /*Arguments: 
+            /*Arguments: 
                 1) UI Control associated with data
                 2) Data size in bytes
-                3) Name associtate with data
-                4) Type of data
-                5) Offset at which to read/write from/to external device */
-
-                new Configuraiton(txtMCBaud, 4, "baud_rate", typeof(uint), offset),
-                new Configuraiton(cbtxtMCTempScale, 1, "temp_scale", typeof(bool), offset += 4),
-                new Configuraiton(txtMCMaxCur, 4, "max_current", typeof(float), offset += 1),
-                new Configuraiton(txtMCMinCur, 4, "min_current", typeof(float), offset += 4),
-                new Configuraiton(txtMCMinEfl, 2, "min_efl", typeof(ushort), offset += 4),
-                new Configuraiton(txtMCMaxEfl, 2, "max_efl", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomSpeed, 2, "zoom_speed", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomNearSoft, 2, "zoom_near_limit", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomFarSoft, 2, "zoom_far_limit", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomNearHard, 2, "zoom_opto_hardstop", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomFarHard, 2, "zoom_far_hardstop", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomHome, 2, "zoom_home", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCZoomP, 4, "zoom_pid_p", typeof(int), offset += 2),
-                new Configuraiton(txtMCZoomI, 4, "zoom_pid_i", typeof(int), offset += 4),
-                new Configuraiton(txtMCZoomD, 4, "zoom_pid_d", typeof(int), offset += 4),
-                new Configuraiton(txtMCFocusSpeed, 2, "focus_speed", typeof(ushort), offset += 4),
-                new Configuraiton(txtMCFocusNearSoft, 2, "focus_near_limit", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCFocusFarSoft, 2, "focus_far_limit", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCFocusNearHard, 2, "focus_opto_hardstop", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCFocusFarHard, 2, "focus_far_hardstop", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCFocusHome, 2, "focus_home", typeof(ushort), offset += 2),
-                new Configuraiton(txtMCFocusP, 4, "focus_pid_p", typeof(int), offset += 2),
-                new Configuraiton(txtMCFocusI, 4, "focus_pid_i", typeof(int), offset += 4),
-                new Configuraiton(txtMCFocusD, 4, "focus_pid_d", typeof(int), offset += 4),
-            };
+                3) Type of data
+                4) Offset at which to read/write from/to external device */
+            mcConfiguraiton.Add("baud_rate", new Configuraiton(txtMCBaud, 4, typeof(uint), offset));
+            mcConfiguraiton.Add("temp_scale", new Configuraiton(cbtxtMCTempScale, 1, typeof(bool), offset += 4));
+            mcConfiguraiton.Add("max_current", new Configuraiton(txtMCMaxCur, 4, typeof(float), offset += 1));
+            mcConfiguraiton.Add("min_current", new Configuraiton(txtMCMinCur, 4, typeof(float), offset += 4));
+            mcConfiguraiton.Add("min_efl", new Configuraiton(txtMCMinEfl, 2, typeof(ushort), offset += 4));
+            mcConfiguraiton.Add("max_efl", new Configuraiton(txtMCMaxEfl, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_speed", new Configuraiton(txtMCZoomSpeed, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_near_limit", new Configuraiton(txtMCZoomNearSoft, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_far_limit", new Configuraiton(txtMCZoomFarSoft, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_opto_hardstop", new Configuraiton(txtMCZoomNearHard, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_far_hardstop", new Configuraiton(txtMCZoomFarHard, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_home", new Configuraiton(txtMCZoomHome, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("zoom_pid_p", new Configuraiton(txtMCZoomP, 4, typeof(int), offset += 2));
+            mcConfiguraiton.Add("zoom_pid_i", new Configuraiton(txtMCZoomI, 4, typeof(int), offset += 4));
+            mcConfiguraiton.Add("zoom_pid_d", new Configuraiton(txtMCZoomD, 4, typeof(int), offset += 4));
+            mcConfiguraiton.Add("focus_speed", new Configuraiton(txtMCFocusSpeed, 2, typeof(ushort), offset += 4));
+            mcConfiguraiton.Add("focus_near_limit", new Configuraiton(txtMCFocusNearSoft, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("focus_far_limit", new Configuraiton(txtMCFocusFarSoft, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("focus_opto_hardstop", new Configuraiton(txtMCFocusNearHard, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("focus_far_hardstop", new Configuraiton(txtMCFocusFarHard, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("focus_home", new Configuraiton(txtMCFocusHome, 2, typeof(ushort), offset += 2));
+            mcConfiguraiton.Add("focus_pid_p", new Configuraiton(txtMCFocusP, 4, typeof(int), offset += 2));
+            mcConfiguraiton.Add("focus_pid_i", new Configuraiton(txtMCFocusI, 4, typeof(int), offset += 4));
+            mcConfiguraiton.Add("focus_pid_d", new Configuraiton(txtMCFocusD, 4, typeof(int), offset += 4));
         }
         #endregion Config Controls 
 
@@ -602,19 +589,17 @@ err:
             ClearTextBoxText(pnlMotorConfig);
             ClearComboBox(pnlMotorConfig);
 
-            Configuraiton config;
-
             // Go trough all configuraiton values and store them inside configruation data structure
             for (int i = 0; i < selectedConfig.Length; i++)
             {
+                // Get configuration name at current index
                 string configName = selectedConfig[i][1].ToString().Trim();
 
                 // Check if configuraiton name from sql server exist inside configuration data structure
-                config = GetConfigByName(configName, mcConfiguraiton);
-                if (config == null) continue;
+                if (!mcConfiguraiton.ContainsKey(configName)) continue;
 
-                config.UpdateData(selectedConfig[i][2].ToString().Trim());
-                config.SetData(); // Update UI
+                mcConfiguraiton[configName].UpdateData(selectedConfig[i][2].ToString().Trim());
+                mcConfiguraiton[configName].SetData(); // Update UI
             }
             return status;
         }
@@ -649,11 +634,14 @@ err:
             // set configuraiton table column names
             colName = new List<string> { dbColModelID, dbColConfigName, dbColConfigValue };
 
-            for (int i = 0; i < mcConfiguraiton.Count; i++)
+            // Go through all configurations inside dictionary
+            foreach(string configName in mcConfiguraiton.Keys)
             {
-                if (!mcConfiguraiton[i].SaveInsideDB) continue;
-                string value = mcConfiguraiton[i].GetStringData();
-                colValue = new List<string> { id.ToString(), mcConfiguraiton[i].DataName, value };
+                // Check if configuraiton should be saved inside database
+                if (!mcConfiguraiton[configName].SaveInsideDB) continue;
+
+                // Store config name
+                colValue = new List<string> { id.ToString(), configName, mcConfiguraiton[configName].GetStringData() };
                 status = sqlServer.AddNewRecord(dbtConfig, colName, colValue);
                 if (status.IsError)
                 {
@@ -717,11 +705,14 @@ err:
             List<string> colName = new List<string> { dbColConfigValue };
             List<string> colValue;
 
-            for (int i = 0; i < mcConfiguraiton.Count; i++)
+            // Go through all configurations inside dictionary
+            foreach (string configName in mcConfiguraiton.Keys)
             {
-                if (!mcConfiguraiton[i].SaveInsideDB) continue;
-                colValue = new List<string> { mcConfiguraiton[i].GetStringData() };
-                status = sqlServer.UpdateRecord(dbtConfig, colName, colValue, dbColModelID, id, dbColConfigName, mcConfiguraiton[i].DataName);
+                // Check if configuraiton should be saved inside database
+                if (!mcConfiguraiton[configName].SaveInsideDB) continue;
+
+                // Update record
+                status = sqlServer.UpdateRecord(dbtConfig, colName, new List<string> { mcConfiguraiton[configName].GetStringData() }, dbColModelID, id, dbColConfigName, configName);
                 if (status.IsError)
                 {
                     MessageBox.Show($"Unable to update values inside database. Error: {status.RetCode}");
@@ -764,9 +755,8 @@ err:
             if (!cbModel.Items.Contains(cbModel.Text))
                 cbModel.Items.Add(cbModel.Text);
 
-            Configuraiton config = GetConfigByName("model", mcConfiguraiton);
-            if (config == null) return;
-            config.UpdateData(cbModel.Text);
+            if (!mcConfiguraiton.ContainsKey("model")) return;
+            mcConfiguraiton["model"].UpdateData(cbModel.Text);
         }
         private void cbModel_SelectedIndexChanged(object sender, EventArgs e)
         {
