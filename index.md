@@ -1,5 +1,5 @@
-### **Project Name: Lens Configuraiton Manager**
-### **Project Description: Allow users to seelected model number and retrieved all configuraiton information from database to send it to external device**
+### **Lens Configuraiton Manager**
+#### Allow users to seelected model number and retrieved all configuraiton information from database to send it to external device
 
 ### **CS-499-02 Informal Code Review**
 #### Review of implemented code and outline of artifacts that require modifications
@@ -19,7 +19,9 @@
 
 ### **Application Memory Usage**
 #### Using C# API SQL query was constructed to retrieve all data from selected database table and place it inside `DataTable` class on stack. Due to this implementation as database grows, loading entire table content into the memory could lead to stack overflow error. 
-#### Example for SQL query being used `SELECT * FROM dbo.table`
+#### Example for SQL query being used:
+##### ```SELECT * FROM dbo.table```
 
 #### In order to fix this issue new function were create that would accept additional arguments that include id column name and id number. This change would only retreive configuraiton information from database for selected model id.
-#### Example of new SQL query to fix the issue `SELECT * FROM dbo.table WHERE col_id_name = id`
+#### Example of new SQL query to fix the issue:
+##### ```SELECT * FROM dbo.table WHERE col_id_name = id```
