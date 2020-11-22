@@ -1,6 +1,6 @@
 ### **Lens Configuraiton Manager**
 #### Allow users to seelected model number and retrieved all configuraiton information from database to send it to external device
-![Image of UI](https://github.com/SlavikSNHU/slavik-eportfolio/blob/gh-pages/GUI.PNG)
+![UI Design](/GUI.PNG)
 
 ### **CS-499-02 Informal Code Review**
 #### Review of implemented code and outline of artifacts that require modifications
@@ -13,7 +13,7 @@
 3. Continue to function without connection to database.
 4. Connection checking to database.
 
-### **Artifacts Breakdown**.
+### **Artifacts Breakdown**
 <div style="width:641px; height:76px; overflow:hidden">
   <img src="https://miro.medium.com/max/700/0*__5nhm_2qHSrTVoZ" width="640" height="120">
 </div>
