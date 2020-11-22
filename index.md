@@ -8,10 +8,10 @@
 
 
 ### **List of Artifacts**
-1. Application memory usage.
-2. Use of proper data structures for quick lookups.
-3. Continue to function without connection to database.
-4. Connection checking to database.
+1. - [x] Application memory usage.
+2. - [ ] Use of proper data structures for quick lookups.
+3. - [ ] Continue to function without connection to database.
+4. - [ ] Connection checking to database.
 
 ### **Artifacts Breakdown**
 <div style="width:641px; height:76px; overflow:hidden">
