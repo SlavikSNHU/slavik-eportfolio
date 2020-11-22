@@ -9,5 +9,7 @@
 3. Continue to function without connection to database.
 4. Connection checking to database.
 
-### **Artifacts Breakdown**
-<img src="https://www.macobserver.com/wp-content/uploads/2017/10/code-2434271_1280-1024x538.jpg?ezimgfmt=ng:webp/ngcb1" style="display: block; margin: auto;" />
+### **Artifacts Breakdown**.
+<div style="width:641px; height:76px; overflow:hidden">
+  <img src="https://miro.medium.com/max/700/0*__5nhm_2qHSrTVoZ" width="640" height="120">
+</div>
