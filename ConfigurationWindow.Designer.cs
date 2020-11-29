@@ -592,7 +592,7 @@
             this.txtMCFocusD.ReadOnly = true;
             this.txtMCFocusD.Size = new System.Drawing.Size(67, 23);
             this.txtMCFocusD.TabIndex = 81;
-            this.txtMCFocusD.Text = "-0.014";
+            this.txtMCFocusD.Text = "0";
             this.txtMCFocusD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label30
@@ -620,7 +620,7 @@
             this.txtMCFocusFarSoft.ReadOnly = true;
             this.txtMCFocusFarSoft.Size = new System.Drawing.Size(67, 23);
             this.txtMCFocusFarSoft.TabIndex = 81;
-            this.txtMCFocusFarSoft.Text = "35000";
+            this.txtMCFocusFarSoft.Text = "0";
             this.txtMCFocusFarSoft.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCFocusFarHard
@@ -636,7 +636,7 @@
             this.txtMCFocusFarHard.ReadOnly = true;
             this.txtMCFocusFarHard.Size = new System.Drawing.Size(67, 23);
             this.txtMCFocusFarHard.TabIndex = 81;
-            this.txtMCFocusFarHard.Text = "35000";
+            this.txtMCFocusFarHard.Text = "0";
             this.txtMCFocusFarHard.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCFocusI
@@ -712,7 +712,7 @@
             this.txtMCFocusP.ReadOnly = true;
             this.txtMCFocusP.Size = new System.Drawing.Size(67, 23);
             this.txtMCFocusP.TabIndex = 81;
-            this.txtMCFocusP.Text = "0.012";
+            this.txtMCFocusP.Text = "0";
             this.txtMCFocusP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCFocusSpeed
@@ -728,7 +728,7 @@
             this.txtMCFocusSpeed.ReadOnly = true;
             this.txtMCFocusSpeed.Size = new System.Drawing.Size(67, 23);
             this.txtMCFocusSpeed.TabIndex = 81;
-            this.txtMCFocusSpeed.Text = "55";
+            this.txtMCFocusSpeed.Text = "0";
             this.txtMCFocusSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label49
@@ -1017,7 +1017,7 @@
             this.txtMCZoomD.ReadOnly = true;
             this.txtMCZoomD.Size = new System.Drawing.Size(67, 23);
             this.txtMCZoomD.TabIndex = 81;
-            this.txtMCZoomD.Text = "-0.022";
+            this.txtMCZoomD.Text = "0";
             this.txtMCZoomD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label27
@@ -1045,7 +1045,7 @@
             this.txtMCZoomFarSoft.ReadOnly = true;
             this.txtMCZoomFarSoft.Size = new System.Drawing.Size(67, 23);
             this.txtMCZoomFarSoft.TabIndex = 81;
-            this.txtMCZoomFarSoft.Text = "35000";
+            this.txtMCZoomFarSoft.Text = "0";
             this.txtMCZoomFarSoft.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCZoomFarHard
@@ -1061,7 +1061,7 @@
             this.txtMCZoomFarHard.ReadOnly = true;
             this.txtMCZoomFarHard.Size = new System.Drawing.Size(67, 23);
             this.txtMCZoomFarHard.TabIndex = 81;
-            this.txtMCZoomFarHard.Text = "35000";
+            this.txtMCZoomFarHard.Text = "0";
             this.txtMCZoomFarHard.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCZoomI
@@ -1137,7 +1137,7 @@
             this.txtMCZoomP.ReadOnly = true;
             this.txtMCZoomP.Size = new System.Drawing.Size(67, 23);
             this.txtMCZoomP.TabIndex = 81;
-            this.txtMCZoomP.Text = "0.022";
+            this.txtMCZoomP.Text = "0";
             this.txtMCZoomP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCZoomSpeed
@@ -1153,7 +1153,7 @@
             this.txtMCZoomSpeed.ReadOnly = true;
             this.txtMCZoomSpeed.Size = new System.Drawing.Size(67, 23);
             this.txtMCZoomSpeed.TabIndex = 81;
-            this.txtMCZoomSpeed.Text = "55";
+            this.txtMCZoomSpeed.Text = "0";
             this.txtMCZoomSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label46
@@ -1413,7 +1413,7 @@
             this.txtMCMaxEfl.ReadOnly = true;
             this.txtMCMaxEfl.Size = new System.Drawing.Size(67, 23);
             this.txtMCMaxEfl.TabIndex = 81;
-            this.txtMCMaxEfl.Text = "330";
+            this.txtMCMaxEfl.Text = "0";
             this.txtMCMaxEfl.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCMinCur
@@ -1429,7 +1429,7 @@
             this.txtMCMinCur.ReadOnly = true;
             this.txtMCMinCur.Size = new System.Drawing.Size(67, 23);
             this.txtMCMinCur.TabIndex = 81;
-            this.txtMCMinCur.Text = "0.01";
+            this.txtMCMinCur.Text = "0";
             this.txtMCMinCur.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label16
@@ -1457,7 +1457,7 @@
             this.txtMCMaxCur.ReadOnly = true;
             this.txtMCMaxCur.Size = new System.Drawing.Size(67, 23);
             this.txtMCMaxCur.TabIndex = 81;
-            this.txtMCMaxCur.Text = "0.08";
+            this.txtMCMaxCur.Text = "0";
             this.txtMCMaxCur.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCBaud
@@ -1473,7 +1473,7 @@
             this.txtMCBaud.ReadOnly = true;
             this.txtMCBaud.Size = new System.Drawing.Size(67, 23);
             this.txtMCBaud.TabIndex = 81;
-            this.txtMCBaud.Text = "115200";
+            this.txtMCBaud.Text = "0";
             this.txtMCBaud.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtMCMinEfl
@@ -1489,7 +1489,7 @@
             this.txtMCMinEfl.ReadOnly = true;
             this.txtMCMinEfl.Size = new System.Drawing.Size(67, 23);
             this.txtMCMinEfl.TabIndex = 81;
-            this.txtMCMinEfl.Text = "15";
+            this.txtMCMinEfl.Text = "0";
             this.txtMCMinEfl.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label15

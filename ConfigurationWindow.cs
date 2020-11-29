@@ -13,8 +13,8 @@ namespace SNHU_CS499_SlavikPlamadyala
         private Dictionary<string, Configuration> mcConfiguraiton = new Dictionary<string, Configuration>();
 
         private const string dbConnection = @"user id=na;server=na;Trusted_Connection=yes;database=na;connection timeout=1";
-        private const string dbtModel = "dbo.Model";
-        private const string dbtConfig = "dbo.Configuration";
+        private const string dbtModel = "Model";
+        private const string dbtConfig = "Configuration";
 
         private const string dbColModelID = "modelID";
         private const string dbColModelNumber = "modelNumber";
@@ -31,12 +31,34 @@ namespace SNHU_CS499_SlavikPlamadyala
             InitializeComponent();
             InitializeMCControls();
 
-            // Attempt to establish connection with SQL database
-            isDatabaseAvialable = sqlServer.Connect(dbConnection);
+            // Attempt to establish connection with remote SQL database
+            if (!sqlServer.ConnectRemote(dbConnection))
+            {
+                // Compile table information
+                SQLServer.SQLiteTable[] dbTables = new SQLServer.SQLiteTable[2];
+
+                // Create model table
+                dbTables[0].TableName = dbtModel;
+                dbTables[0].ColumnNames = new string[] { dbColModelID, dbColModelNumber, dbColDeviceName };
+                dbTables[0].ColumnDataType = new string[] { sqlServer.GetSQLiteStringPrimaryKey, sqlServer.GetSQLiteStringText, sqlServer.GetSQLiteStringText };
+
+                // Create configuration table
+                dbTables[1].TableName = dbtConfig;
+                dbTables[1].ColumnNames = new string[] { dbColModelID, dbColConfigName, dbColConfigValue };
+                dbTables[1].ColumnDataType = new string[] { sqlServer.GetSQLiteStringInt, sqlServer.GetSQLiteStringText, sqlServer.GetSQLiteStringText };
+
+                // Connect to local SQLite database
+                isDatabaseAvialable = sqlServer.ConnectLocal(dbTables);
+            }
+            else
+                isDatabaseAvialable = true;
+
+            cbtxtMCTempScale.SelectedIndex = 0;
 
             // Load list of all available model numbers from SQL database
             GetModelList();
             pnlMain.Focus();
+
         }
 
         #region Misc

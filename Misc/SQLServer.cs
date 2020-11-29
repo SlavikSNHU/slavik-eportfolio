@@ -4,20 +4,52 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Data.SQLite;
+using System.IO;
 
 namespace SNHU_CS499_SlavikPlamadyala
 {
     class SQLServer
     {
-        private SqlConnection sqlDatabase;
+        public struct SQLiteTable
+        {
+            public string TableName;
+            public string[] ColumnNames;
+            public string[] ColumnDataType;
+        }
 
-        public bool Connect(string connString)
+        public string GetSQLiteStringPrimaryKey = "INTEGER PRIMARY KEY";
+        public string GetSQLiteStringText = "TEXT";
+        public string GetSQLiteStringInt = "INT";
+
+        public string ConvertTypeFromSQLiteString(string type)
+        {
+            if(type.Equals(GetSQLiteStringPrimaryKey) || type.Equals(GetSQLiteStringInt))
+            {
+                return "System.Int32";
+            }
+            else if(type.Equals(GetSQLiteStringText))
+            {
+                return "System.String";
+            }
+            return "System.Int32";
+        }
+
+        private Dictionary<string, DataTable> sqlLiteTables = new Dictionary<string, DataTable>();
+        
+        private SqlConnection sqlDatabase;
+        private SQLiteConnection sqlLiteDatabase;
+
+        private bool useRemote = false; 
+
+        public bool ConnectRemote(string connString)
         {
             try
             {
                 sqlDatabase = new SqlConnection(connString);
                 sqlDatabase.Open();
                 sqlDatabase.Close();
+                useRemote = true;
                 return true;
             }
             catch
@@ -26,14 +58,95 @@ namespace SNHU_CS499_SlavikPlamadyala
             }
         }
 
-        public bool IsConnected => sqlDatabase.State == ConnectionState.Open;
+        public bool ConnectLocal(SQLiteTable[] tableInfo)
+        {
+            string localFileLocation = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\local.db";
+            try
+            {
+                // Check if local database file need to be created
+                if (!File.Exists(localFileLocation))
+                {
+                    SQLiteConnection.CreateFile(localFileLocation);
+
+                    sqlLiteDatabase = new SQLiteConnection($"Data Source={localFileLocation};Version=3;");
+                    sqlLiteDatabase.Open();
+                    SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                    
+                    // Create tables
+                    foreach (SQLiteTable table in tableInfo)
+                    {
+                        DataTable dataTable = new DataTable();
+                        DataColumn dataColumn;
+
+                        string command = $@"CREATE TABLE {table.TableName}(";
+
+                        for(int i = 0; i < table.ColumnNames.Length - 1; i++)
+                        {
+                            dataColumn = new DataColumn();
+                            dataColumn.DataType = Type.GetType(ConvertTypeFromSQLiteString(table.ColumnDataType[i]));
+                            dataColumn.ColumnName = table.ColumnNames[i];
+                            dataTable.Columns.Add(dataColumn);
+
+                            command += $@"{table.ColumnNames[i]} {table.ColumnDataType[i]},";
+                        }
+
+                        command += $@"{table.ColumnNames[table.ColumnNames.Length - 1]} {table.ColumnDataType[table.ColumnNames.Length - 1]})";
+                        dataColumn = new DataColumn();
+                        dataColumn.DataType = Type.GetType(ConvertTypeFromSQLiteString(table.ColumnDataType[table.ColumnNames.Length - 1]));
+                        dataColumn.ColumnName = table.ColumnNames[table.ColumnNames.Length - 1];
+                        dataTable.Columns.Add(dataColumn);
+
+                        cmd.CommandText = command;
+                        cmd.ExecuteNonQuery();
+                        sqlLiteTables.Add(table.TableName, dataTable);
+                    }
+                }
+                else
+                {
+                    sqlLiteDatabase = new SQLiteConnection($"Data Source={localFileLocation};Version=3;");
+                    sqlLiteDatabase.Open();
+
+                    // Create tables
+                    foreach (SQLiteTable table in tableInfo)
+                    {
+                        DataTable dataTable = new DataTable();
+                        DataColumn dataColumn;
+
+                        for (int i = 0; i < table.ColumnNames.Length; i++)
+                        {
+                            dataColumn = new DataColumn();
+                            dataColumn.DataType = Type.GetType(ConvertTypeFromSQLiteString(table.ColumnDataType[i]));
+                            dataColumn.ColumnName = table.ColumnNames[i];
+                            dataTable.Columns.Add(dataColumn);
+                        }
+                        sqlLiteTables.Add(table.TableName, dataTable);
+                    }
+                }
+                sqlLiteDatabase.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool IsConnected => CheckConnection();
+
+        private bool CheckConnection()
+        {
+            if (useRemote)
+                return sqlDatabase.State == ConnectionState.Open;
+            else
+                return true;
+        }
 
         /// <summary>
         /// Send Non Query SQL command.
         /// </summary>
         /// <param name="command">SQL command</param>
         /// <returns>SQL Server connection status.</returns>
-        public retStatus SendNonQCommand(string command)
+        private retStatus SendNonQCommand(string command)
         {
             try
             {
@@ -59,7 +172,7 @@ namespace SNHU_CS499_SlavikPlamadyala
         /// <param name="add_with_format">String value to search for and replace with column values.</param>
         /// <param name="col_values">Column values</param>
         /// <returns></returns>
-        public retStatus SendNonQCommand(string command, string add_with_format, List<string> col_values)
+        private retStatus SendNonQCommand(string command, string add_with_format, List<string> col_values)
         {
             try
             {
@@ -82,6 +195,25 @@ namespace SNHU_CS499_SlavikPlamadyala
             }
         }
 
+        private retStatus InsertData(string command)
+        {
+            try
+            {
+                SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                sqlLiteDatabase.Open();
+                cmd.CommandText = command;
+                cmd.ExecuteNonQuery();
+                sqlLiteDatabase.Close();
+                return new retStatus();
+            }
+            catch (Exception ex)
+            {
+                sqlLiteDatabase.Close();
+                Debug.WriteLine($"SQL ERROR: {ex.Message}");
+                return new retStatus(retStatus.ReturnCodes.ERR_SQL_BAD_QUERY);
+            }
+        }
+
         /// <summary>
         /// Create new record inside selected database table and columns.
         /// </summary>
@@ -95,28 +227,52 @@ namespace SNHU_CS499_SlavikPlamadyala
             string full_col_values = "(";
             string sql_command = "";
             int i = 0;
-
-            //combine column names and values in to proper sql command.
-            for (i = 0; i < col_values.Count; i++)
+            if (useRemote)
             {
-                //Check if array value is at the end of array
-                if (i == (col_values.Count - 1))
+                //combine column names and values in to proper sql command.
+                for (i = 0; i < col_values.Count; i++)
                 {
-                    //last string structure
-                    full_col_names += col_names[i] + ")";
-                    full_col_values += "@t" + i + ")";
+                    //Check if array value is at the end of array
+                    if (i == (col_values.Count - 1))
+                    {
+                        //last string structure
+                        full_col_names += col_names[i] + ")";
+                        full_col_values += "@t" + i + ")";
+                    }
+                    else
+                    {
+                        //normal string structure
+                        full_col_names += col_names[i] + ",";
+                        full_col_values += "@t" + i + ",";
+                    }
                 }
-                else
-                {
-                    //normal string structure
-                    full_col_names += col_names[i] + ",";
-                    full_col_values += "@t" + i + ",";
-                }
+
+                sql_command = "INSERT INTO " + table_name + " " + full_col_names + " VALUES " + full_col_values;
+                return SendNonQCommand(sql_command, "@t", col_values);
             }
+            else
+            {
+                full_col_values += "'";
+                for (i = 0; i < col_values.Count; i++)
+                {
+                    //Check if array value is at the end of array
+                    if (i == (col_values.Count - 1))
+                    {
+                        //last string structure
+                        full_col_names += col_names[i] + ")";
+                        full_col_values += col_values[i] + "')";
+                    }
+                    else
+                    {
+                        //normal string structure
+                        full_col_names += col_names[i] + ",";
+                        full_col_values += col_values[i] + "','";
+                    }
+                }
 
-            sql_command = "INSERT INTO " + table_name + " " + full_col_names + " VALUES " + full_col_values;
-
-            return SendNonQCommand(sql_command, "@t", col_values);
+                sql_command = "INSERT INTO " + table_name + " " + full_col_names + " VALUES " + full_col_values + ";";
+                return InsertData(sql_command);
+            }
         }
         /// <summary>
         /// Update selected table record.
@@ -133,17 +289,47 @@ namespace SNHU_CS499_SlavikPlamadyala
             int i = 0;
 
             //create string with values connected to columns.
-            for (i = 0; i < col_values.Count; i++)
+            if (useRemote)
             {
-                if (i == (col_values.Count - 1))
-                    command += col_names[i] + " = @t" + i;
-                else
-                    command += col_names[i] + " = @t" + i + ",";
+                for (i = 0; i < col_values.Count; i++)
+                {
+                    if (i == (col_values.Count - 1))
+                        command += col_names[i] + " = @t" + i;
+                    else
+                        command += col_names[i] + " = @t" + i + ",";
+                }
+                sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id;
+
+                return SendNonQCommand(sql_command, "@t", col_values);
             }
+            else
+            {
+                for (i = 0; i < col_values.Count; i++)
+                {
+                    if (i == (col_values.Count - 1))
+                        command += col_names[i] + " = '" + col_values[i] + "'";
+                    else
+                        command += col_names[i] + " = '" + col_values[i] + "',";
+                }
+                sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id;
 
-            sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id;
+                try
+                {
+                    SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                    sqlLiteDatabase.Open();
+                    cmd.CommandText = sql_command;
+                    cmd.ExecuteNonQuery();
+                    sqlLiteDatabase.Close();
+                }
+                catch (Exception ex)
+                {
+                    sqlLiteDatabase.Close();
+                    Debug.WriteLine($"SQL ERROR: {ex.Message}");
+                    return new retStatus(retStatus.ReturnCodes.ERR_SQL_BAD_QUERY);
+                }
 
-            return SendNonQCommand(sql_command, "@t", col_values);
+                return new retStatus();
+            }
         }
         /// <summary>
         /// Update selected table record.
@@ -162,17 +348,46 @@ namespace SNHU_CS499_SlavikPlamadyala
             int i = 0;
 
             //create string with values connected to columns.
-            for (i = 0; i < col_values.Count; i++)
+            if (useRemote)
             {
-                if (i == (col_values.Count - 1))
-                    command += col_names[i] + " = @t" + i;
-                else
-                    command += col_names[i] + " = @t" + i + ",";
+                for (i = 0; i < col_values.Count; i++)
+                {
+                    if (i == (col_values.Count - 1))
+                        command += col_names[i] + " = @t" + i;
+                    else
+                        command += col_names[i] + " = @t" + i + ",";
+                }
+
+                sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id + " AND " + col_name + " = '" + col_value + "'";
+                return SendNonQCommand(sql_command, "@t", col_values);
             }
+            else
+            {
+                for (i = 0; i < col_values.Count; i++)
+                {
+                    if (i == (col_values.Count - 1))
+                        command += col_names[i] + " = '" + col_values[i] + "'";
+                    else
+                        command += col_names[i] + " = '" + col_values[i] + "',";
+                }
+                sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id + " AND " + col_name + " = '" + col_value + "'";
+                try
+                {
+                    SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                    sqlLiteDatabase.Open();
+                    cmd.CommandText = sql_command;
+                    cmd.ExecuteNonQuery();
+                    sqlLiteDatabase.Close();
+                }
+                catch (Exception ex)
+                {
+                    sqlLiteDatabase.Close();
+                    Debug.WriteLine($"SQL ERROR: {ex.Message}");
+                    return new retStatus(retStatus.ReturnCodes.ERR_SQL_BAD_QUERY);
+                }
 
-            sql_command = "UPDATE " + table_name + " SET " + command + " WHERE " + id_name + " = " + id + " AND " + col_name + " = '" + col_value + "'";
-
-            return SendNonQCommand(sql_command, "@t", col_values);
+                return new retStatus();
+            }
         }
 
         /// <summary>
@@ -184,7 +399,27 @@ namespace SNHU_CS499_SlavikPlamadyala
         public retStatus DeleteRecord(string table_name, string id_name, int id)
         {
             string sql_command = "DELETE FROM " + table_name + " WHERE " + id_name + " = " + id;
-            return SendNonQCommand(sql_command);
+            if(useRemote)
+                return SendNonQCommand(sql_command);
+            else
+            {
+                try
+                {
+                    SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                    sqlLiteDatabase.Open();
+                    cmd.CommandText = sql_command;
+                    cmd.ExecuteNonQuery();
+                    sqlLiteDatabase.Close();
+                }
+                catch (Exception ex)
+                {
+                    sqlLiteDatabase.Close();
+                    Debug.WriteLine($"SQL ERROR: {ex.Message}");
+                    return new retStatus(retStatus.ReturnCodes.ERR_SQL_BAD_QUERY);
+                }
+
+                return new retStatus();
+            }
         }
 
         /// <summary>
@@ -197,22 +432,49 @@ namespace SNHU_CS499_SlavikPlamadyala
         {
             dataTable = new DataTable();
             string sql_command = "SELECT * FROM " + table_name;
-            try
+            if(useRemote)
             {
-                using (SqlCommand sqlCommand = new SqlCommand(sql_command, sqlDatabase))
+                try
                 {
-                    sqlDatabase.Open();
-                    var dataAdapter = new SqlDataAdapter(sqlCommand);
-                    dataAdapter.Fill(dataTable);
-                    sqlDatabase.Close();
-                }
+                    using (SqlCommand sqlCommand = new SqlCommand(sql_command, sqlDatabase))
+                    {
+                        sqlDatabase.Open();
+                        var dataAdapter = new SqlDataAdapter(sqlCommand);
+                        dataAdapter.Fill(dataTable);
+                        sqlDatabase.Close();
+                    }
 
-                return new retStatus();
+                    return new retStatus();
+                }
+                catch
+                {
+                    sqlDatabase.Close();
+                    return new retStatus(retStatus.ReturnCodes.ERR_SQL_GET_DATA_TABLE);
+                }
             }
-            catch
+            else
             {
-                sqlDatabase.Close();
-                return new retStatus(retStatus.ReturnCodes.ERR_SQL_GET_DATA_TABLE);
+                SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                sqlLiteDatabase.Open();
+                cmd.CommandText = sql_command;
+                SQLiteDataReader dataReader = cmd.ExecuteReader();
+                dataTable = sqlLiteTables[table_name].Clone();
+
+                while (dataReader.Read())
+                {
+                    DataRow row = dataTable.NewRow();
+                    for (int i = 0; i < sqlLiteTables[table_name].Columns.Count; i++)
+                    {
+                        // TODO: Implement better type checking
+                        if(sqlLiteTables[table_name].Columns[i].DataType == Type.GetType(ConvertTypeFromSQLiteString(GetSQLiteStringInt)))
+                            row[i] = dataReader.GetInt32(i);
+                        else
+                            row[i] = dataReader.GetString(i);
+                    }
+                    dataTable.Rows.Add(row);
+                }
+                sqlLiteDatabase.Close();
+                return new retStatus();
             }
         }
         /// <summary>
@@ -227,22 +489,49 @@ namespace SNHU_CS499_SlavikPlamadyala
         {
             dataTable = new DataTable();
             string sql_command = $"SELECT * FROM {table_name} WHERE {idColName}={id}";
-            try
+            if (useRemote)
             {
-                using (SqlCommand sqlCommand = new SqlCommand(sql_command, sqlDatabase))
+                try
                 {
-                    sqlDatabase.Open();
-                    var dataAdapter = new SqlDataAdapter(sqlCommand);
-                    dataAdapter.Fill(dataTable);
-                    sqlDatabase.Close();
-                }
+                    using (SqlCommand sqlCommand = new SqlCommand(sql_command, sqlDatabase))
+                    {
+                        sqlDatabase.Open();
+                        var dataAdapter = new SqlDataAdapter(sqlCommand);
+                        dataAdapter.Fill(dataTable);
+                        sqlDatabase.Close();
+                    }
 
-                return new retStatus();
+                    return new retStatus();
+                }
+                catch
+                {
+                    sqlDatabase.Close();
+                    return new retStatus(retStatus.ReturnCodes.ERR_SQL_GET_DATA_TABLE);
+                }
             }
-            catch
+            else
             {
-                sqlDatabase.Close();
-                return new retStatus(retStatus.ReturnCodes.ERR_SQL_GET_DATA_TABLE);
+                SQLiteCommand cmd = new SQLiteCommand(sqlLiteDatabase);
+                sqlLiteDatabase.Open();
+                cmd.CommandText = sql_command;
+                SQLiteDataReader dataReader = cmd.ExecuteReader();
+                dataTable = sqlLiteTables[table_name].Clone();
+
+                while (dataReader.Read())
+                {
+                    DataRow row = dataTable.NewRow();
+                    for (int i = 0; i < sqlLiteTables[table_name].Columns.Count; i++)
+                    {
+                        // TODO: Implement better type checking
+                        if (sqlLiteTables[table_name].Columns[i].DataType == Type.GetType(ConvertTypeFromSQLiteString(GetSQLiteStringInt)))
+                            row[i] = dataReader.GetInt32(i);
+                        else
+                            row[i] = dataReader.GetString(i);
+                    }
+                    dataTable.Rows.Add(row);
+                }
+                sqlLiteDatabase.Close();
+                return new retStatus();
             }
         }
         /// <summary>
