@@ -1,1 +1,1 @@
-# Slavik Plamadyala Capstone
+# Slavik Plamadyala SNHU Computer Science Projects Repository
