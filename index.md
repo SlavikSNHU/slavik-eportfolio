@@ -28,5 +28,8 @@
 ### **Use of Proper Data Structures**
 ------------
 #### To handle configuration values that consisted of number of different data types i have created a class that would handle parsing of incoming and outcoming data. For each configuraiton i would create a single class and place it inside linked list. When i needed to update different configurations i would loop trough the list and check configuraiton name. Once i find the configuraiton i am looking for i will then return its object.
-#### Example for SQL query being used:
+#### The problem is with a larger amount of configuraiton values the task of searching for proper configuraiton could take awhile.
+#### Since my applicaiton is using less memory due to improvements in previous artifact i could use a hash table in form of C# `Dictionary<T,T>`. By changing from list to dictionary i was able to save huge amount of time when selecting different configurations.
+#### When previous for exmaple i had to use a loop to go trough the list, now i could just use `CustomConfig myConfig = configDictionary[configName];`
+
 
