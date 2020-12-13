@@ -1,5 +1,5 @@
 ## **Lens Configuraiton Manager** 
-[![Build Status](https://github.com/ruby/ruby/workflows/Windows/badge.svg)](https://github.com/SlavikSNHU/slavik-eportfolio/tree/master)
+[![Action Status](https://github.com/ruby/ruby/workflows/Windows/badge.svg)](https://github.com/SlavikSNHU/slavik-eportfolio/tree/master)
 #### Allow users to seelected model number and retrieved all configuraiton information from database to send it to external device
 ![UI Design](/GUI.PNG)
 
