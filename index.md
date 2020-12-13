@@ -13,7 +13,7 @@
 3. Continue to function without connection to database on a network.
 
 ##  __Artifacts Breakdown__
-
+------------
 ### **Application Memory Usage**
 ------------
 #### Using C# API SQL query was constructed to retrieve all data from selected database table and place it inside `DataTable` class on stack. Due to this implementation as database grows, loading entire table content into the memory could lead to stack overflow error. 
