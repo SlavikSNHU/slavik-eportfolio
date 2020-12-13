@@ -48,7 +48,7 @@ The problem is with a larger amount of configuration values the task of searchin
 
 Since my application is using less memory due to improvements in previous artifact I could use a hash table in form of C# `Dictionary<T,T>`. By changing from list to dictionary I was able to save huge amount of time when selecting different configurations.
 
-When previously i had to use a loop to go through the list to find right configuraiton, now I could just use `CustomConfig myConfig = configDictionary[configName];`
+When previously I had to use a loop to go through the list to find right configuration, now I could just use `CustomConfig myConfig = configDictionary[configName];`
 
 ------------
 #### *While working on this artifact I was able to better organize various configuration data inside custom class. By doing so it made my code clean and easy to understand. It also helped during debugging stages since I had to make changes only in one area. It also allowed me to handle various data types and connecting of UI elements to configuration data.*
