@@ -25,4 +25,8 @@
 #### Example of new SQL query to fix the issue:
 ##### ```SELECT * FROM dbo.table WHERE col_id_name = id```
 ------------
+### **Use of Proper Data Structures**
+------------
+#### To handle configuration values that consisted of number of different data types i have created a class that would handle parsing of incoming and outcoming data. For each configuraiton i would create a single class and place it inside linked list. When i needed to update different configurations i would loop trough the list and check configuraiton name. Once i find the configuraiton i am looking for i will then return its object.
+#### Example for SQL query being used:
 
